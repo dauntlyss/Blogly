@@ -1,26 +1,36 @@
-"""Models for Blogly."""
+"""SQLAlchemy models for blogly."""
+import datetime
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
-DEFAULT_PICTURE = "https://unsplash.com/photos/_ZS_mtl_H_0"
 
-# Models
+DEFAULT_IMAGE_URL = "https://www.freeiconspng.com/uploads/icon-user-blue-symbol-people-person-generic--public-domain--21.png"
+
 
 class User(db.Model):
-    """Users table"""
+    """Site user."""
 
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.Text, nullable=False)
+    last_name = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.Text, nullable=False, default=DEFAULT_IMAGE_URL)
 
-    first_name = db.Column(db.String(50), nullable=False)
+    posts = db.relationship("Post", backref="user", cascade="all, delete-orphan")
+    
+    @property
+    def full_name(self):
+        """Return full name of user."""
 
-    last_name = db.Column(db.String(50), nullable=False)
-
-    image_url = db.Column(db.String(500), nullable=False, default=DEFAULT_PICTURE)
-
+        return f"{self.first_name} {self.last_name}"
 
 
 def connect_db(app):
-  db.app = app
-  db.init_app(app)
+    """Connect this database to provided Flask app.
+
+    You should call this in your Flask app.
+    """
+
+    db.app = app
+    db.init_app(app)
